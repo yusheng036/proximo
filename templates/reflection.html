@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Final Reflection — Proximo{% endblock %}
+
+{% block body %}
+<div class="min-h-screen px-4 py-12">
+  <div class="max-w-2xl mx-auto">
+
+    <div class="mb-8 text-center">
+      <span class="inline-block text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full mb-3">
+        Final Step
+      </span>
+      <h1 class="text-2xl font-bold text-gray-900">Looking Back</h1>
+      <p class="text-gray-500 text-sm mt-1">You just completed both tutoring sessions. Take a moment to compare them.</p>
+    </div>
+
+    <!-- Session recap -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-gray-400 mb-1">SESSION 1</p>
+        <p class="text-sm font-semibold text-gray-800">Recursive Fibonacci</p>
+        <p class="text-xs text-gray-500 mt-0.5">Computer Science</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <p class="text-xs font-medium text-gray-400 mb-1">SESSION 2</p>
+        <p class="text-sm font-semibold text-gray-800">Bayes' Theorem</p>
+        <p class="text-xs text-gray-500 mt-0.5">Mathematics</p>
+      </div>
+    </div>
+
+    <form id="reflection-form" onsubmit="submitReflection(event)">
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-4 space-y-6">
+
+        <!-- Q1: Which session was more motivating -->
+        <div>
+          <p class="text-sm font-medium text-gray-800 mb-3">
+            Thinking about the <em>tutoring style</em> (not the topic difficulty), which session felt more motivating to you?
+          </p>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="more_motivating_session" value="1" required class="accent-indigo-600">
+              <span class="text-sm text-gray-700">Session 1 felt more motivating</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="more_motivating_session" value="2" required class="accent-indigo-600">
+              <span class="text-sm text-gray-700">Session 2 felt more motivating</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="more_motivating_session" value="0" required class="accent-indigo-600">
+              <span class="text-sm text-gray-700">No preference — they felt similar</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2: Why -->
+        <div>
+          <label class="block text-sm font-medium text-gray-800 mb-2">
+            Can you describe what specifically made one feel more (or less) motivating than the other?
+          </label>
+          <textarea
+            name="more_motivating_reason"
+            rows="4"
+            required
+            minlength="10"
+            placeholder="What was different about the tutor's style, tone, or approach? What felt engaging or off-putting?"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Q3: Free form -->
+        <div>
+          <label class="block text-sm font-medium text-gray-800 mb-2">
+            Any other thoughts or feedback on either tutoring session? (Optional)
+          </label>
+          <textarea
+            name="free_form_comments"
+            rows="3"
+            placeholder="Anything else you'd like to share…"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        id="submit-btn"
+        class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-sm"
+      >
+        Complete Study &rarr;
+      </button>
+      <p id="error-msg" class="hidden mt-3 text-red-600 text-sm text-center"></p>
+    </form>
+  </div>
+</div>
+
+<script>
+const PID = {{ pid | tojson }};
+
+async function submitReflection(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const btn = document.getElementById('submit-btn');
+  const errEl = document.getElementById('error-msg');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  errEl.classList.add('hidden');
+
+  const raw = fd.get('more_motivating_session');
+  const sessionVal = raw === '0' ? null : parseInt(raw);
+
+  const reflection = {
+    more_motivating_session: sessionVal,
+    more_motivating_reason: fd.get('more_motivating_reason') || '',
+    free_form_comments: fd.get('free_form_comments') || '',
+    submitted_at: new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch('/api/reflections', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ participant_id: PID, reflection }),
+    });
+    if (!res.ok) throw new Error();
+    window.location.href = '/done';
+  } catch {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Complete Study →';
+  }
+}
+</script>
+{% endblock %}

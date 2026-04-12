@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — Proximo{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gray-50">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div>
+      <h1 class="text-lg font-bold text-gray-900">Proximo — Admin Dashboard</h1>
+      <p class="text-sm text-gray-400">{{ count }} participant{{ 's' if count != 1 else '' }} enrolled</p>
+    </div>
+    <div class="flex gap-3">
+      <a
+        href="/admin/export.csv"
+        class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Download CSV
+      </a>
+      <form action="/admin/logout" method="post">
+        <button type="submit" class="text-sm text-gray-500 hover:text-gray-800 px-3 py-2 rounded-lg transition-colors">
+          Log out
+        </button>
+      </form>
+    </div>
+  </header>
+
+  <div class="px-6 py-6">
+
+    {% if count == 0 %}
+    <div class="text-center py-16 text-gray-400">
+      <p class="text-base">No participants yet.</p>
+      <p class="text-sm mt-1">Share the study URL to get started.</p>
+    </div>
+    {% else %}
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      {% set completed = participants | selectattr('completed_at') | list | length %}
+      {% set s1_done = participants | selectattr('sessions.0') | list | length %}
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <p class="text-2xl font-bold text-gray-900">{{ count }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">Total enrolled</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <p class="text-2xl font-bold text-gray-900">{{ completed }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">Fully complete</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <p class="text-2xl font-bold text-gray-900">{{ participants | selectattr('surveys') | list | length }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">At least 1 survey done</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <p class="text-2xl font-bold text-gray-900">{{ count - completed }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">In progress</p>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Enrolled</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">S1</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">S2</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for p in participants %}
+          {% set s1 = p.sessions[0] %}
+          {% set s2 = p.sessions[1] %}
+          {% set survey1 = p.surveys | selectattr('session_number', 'equalto', 1) | first | default(none) %}
+          {% set survey2 = p.surveys | selectattr('session_number', 'equalto', 2) | first | default(none) %}
+          <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDetail('detail-{{ loop.index }}')">
+            <td class="px-4 py-3 font-medium text-gray-900">{{ p.name }}</td>
+            <td class="px-4 py-3 text-gray-400 font-mono text-xs">{{ p.id[:8] }}…</td>
+            <td class="px-4 py-3 text-gray-500 text-xs">{{ p.created_at[:10] }}</td>
+            <td class="px-4 py-3">
+              <div class="flex gap-1">
+                <span class="px-1.5 py-0.5 rounded text-xs {{ 'bg-blue-100 text-blue-700' if p.session_order[0] == 'standard' else 'bg-violet-100 text-violet-700' }}">
+                  {{ 'STD' if p.session_order[0] == 'standard' else 'FS' }}
+                </span>
+                <span class="text-gray-300">→</span>
+                <span class="px-1.5 py-0.5 rounded text-xs {{ 'bg-blue-100 text-blue-700' if p.session_order[1] == 'standard' else 'bg-violet-100 text-violet-700' }}">
+                  {{ 'STD' if p.session_order[1] == 'standard' else 'FS' }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              {% if s1 %}
+                <span class="text-xs {{ 'text-emerald-600 font-medium' if s1.ended_at else 'text-amber-600' }}">
+                  {{ '✓ done' if s1.ended_at else '⏳ active' }}
+                </span>
+                {% if survey1 %}
+                  <span class="ml-1 text-xs text-gray-400">(surveyed)</span>
+                {% endif %}
+              {% else %}
+                <span class="text-xs text-gray-300">—</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3">
+              {% if s2 %}
+                <span class="text-xs {{ 'text-emerald-600 font-medium' if s2.ended_at else 'text-amber-600' }}">
+                  {{ '✓ done' if s2.ended_at else '⏳ active' }}
+                </span>
+                {% if survey2 %}
+                  <span class="ml-1 text-xs text-gray-400">(surveyed)</span>
+                {% endif %}
+              {% else %}
+                <span class="text-xs text-gray-300">—</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3">
+              {% if p.completed_at %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Complete</span>
+              {% elif s1 %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">In progress</span>
+              {% else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Not started</span>
+              {% endif %}
+            </td>
+          </tr>
+          <!-- Expandable detail row -->
+          <tr id="detail-{{ loop.index }}" class="hidden bg-gray-50">
+            <td colspan="7" class="px-4 py-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-700">
+                {% if survey1 %}
+                <div class="bg-white border border-gray-200 rounded-lg p-3">
+                  <p class="font-semibold text-gray-500 mb-2 uppercase tracking-wide text-xs">Session 1 Survey</p>
+                  <div class="grid grid-cols-2 gap-1">
+                    <span>Motivation:</span><span class="font-medium">{{ survey1.motivation }}/5</span>
+                    <span>Engagement:</span><span class="font-medium">{{ survey1.engagement }}/5</span>
+                    <span>Support:</span><span class="font-medium">{{ survey1.perceived_support }}/5</span>
+                    <span>Confidence:</span><span class="font-medium">{{ survey1.self_confidence }}/5</span>
+                    <span>Enjoyment:</span><span class="font-medium">{{ survey1.enjoyment }}/5</span>
+                  </div>
+                  <p class="mt-2 text-gray-500 italic">"{{ survey1.most_helpful[:120] }}{% if survey1.most_helpful | length > 120 %}…{% endif %}"</p>
+                </div>
+                {% endif %}
+                {% if survey2 %}
+                <div class="bg-white border border-gray-200 rounded-lg p-3">
+                  <p class="font-semibold text-gray-500 mb-2 uppercase tracking-wide text-xs">Session 2 Survey</p>
+                  <div class="grid grid-cols-2 gap-1">
+                    <span>Motivation:</span><span class="font-medium">{{ survey2.motivation }}/5</span>
+                    <span>Engagement:</span><span class="font-medium">{{ survey2.engagement }}/5</span>
+                    <span>Support:</span><span class="font-medium">{{ survey2.perceived_support }}/5</span>
+                    <span>Confidence:</span><span class="font-medium">{{ survey2.self_confidence }}/5</span>
+                    <span>Enjoyment:</span><span class="font-medium">{{ survey2.enjoyment }}/5</span>
+                  </div>
+                  <p class="mt-2 text-gray-500 italic">"{{ survey2.most_helpful[:120] }}{% if survey2.most_helpful | length > 120 %}…{% endif %}"</p>
+                </div>
+                {% endif %}
+                {% if p.reflection %}
+                <div class="bg-white border border-gray-200 rounded-lg p-3 sm:col-span-2">
+                  <p class="font-semibold text-gray-500 mb-2 uppercase tracking-wide text-xs">Final Reflection</p>
+                  <p>More motivating session: <strong>{{ p.reflection.more_motivating_session or 'No preference' }}</strong></p>
+                  <p class="mt-1 text-gray-500 italic">"{{ p.reflection.more_motivating_reason[:200] }}{% if p.reflection.more_motivating_reason | length > 200 %}…{% endif %}"</p>
+                </div>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function toggleDetail(id) {
+  const row = document.getElementById(id);
+  row.classList.toggle('hidden');
+}
+</script>
+{% endblock %}

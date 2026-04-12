@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Session {{ session_number }} Survey — Proximo{% endblock %}
+
+{% block body %}
+<div class="min-h-screen px-4 py-12">
+  <div class="max-w-2xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <span class="inline-block text-xs font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full mb-3">
+        Session {{ session_number }} of 2 — Survey
+      </span>
+      <h1 class="text-2xl font-bold text-gray-900">How was that session?</h1>
+      <p class="text-gray-500 text-sm mt-1">Please answer honestly — there are no right or wrong answers.</p>
+    </div>
+
+    <form id="survey-form" onsubmit="submitSurvey(event)">
+
+      <!-- Likert block -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+        <div class="p-5 border-b border-gray-100">
+          <h2 class="text-sm font-semibold text-gray-800">Rate your experience on a scale of 1 to 5</h2>
+          <p class="text-xs text-gray-400 mt-0.5">1 = Strongly Disagree &nbsp;·&nbsp; 5 = Strongly Agree</p>
+        </div>
+
+        <div class="divide-y divide-gray-100">
+          {% set questions = [
+            ("motivation",         "I felt motivated to continue learning after this session."),
+            ("engagement",         "I was actively engaged throughout this tutoring session."),
+            ("perceived_support",  "The tutor effectively supported my understanding."),
+            ("self_confidence",    "I feel more confident in my ability to tackle similar problems."),
+            ("enjoyment",          "I enjoyed this tutoring session."),
+          ] %}
+
+          {% for name, label in questions %}
+          <div class="p-5">
+            <p class="text-sm text-gray-700 mb-3">{{ label }}</p>
+            <div class="flex gap-2">
+              {% for val in range(1, 6) %}
+              <label class="flex flex-col items-center gap-1 cursor-pointer group flex-1">
+                <input
+                  type="radio"
+                  name="{{ name }}"
+                  value="{{ val }}"
+                  required
+                  class="hidden peer"
+                />
+                <span class="w-full text-center py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 peer-checked:bg-indigo-600 peer-checked:border-indigo-600 peer-checked:text-white group-hover:border-indigo-300 transition-colors select-none">
+                  {{ val }}
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+            <div class="flex justify-between mt-1">
+              <span class="text-xs text-gray-400">Strongly disagree</span>
+              <span class="text-xs text-gray-400">Strongly agree</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Open-ended block -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-6 space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-800 mb-2">
+            What was most helpful about this tutoring session?
+          </label>
+          <textarea
+            name="most_helpful"
+            rows="3"
+            required
+            minlength="5"
+            placeholder="Describe what felt useful or effective…"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-800 mb-2">
+            Is there anything about the tutor's approach that you found unhelpful or off-putting?
+          </label>
+          <textarea
+            name="least_helpful"
+            rows="3"
+            placeholder="(Optional) Describe anything that didn't work well…"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        id="submit-btn"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-sm"
+      >
+        Submit &amp; Continue &rarr;
+      </button>
+
+      <p id="error-msg" class="hidden mt-3 text-red-600 text-sm text-center"></p>
+    </form>
+  </div>
+</div>
+
+<script>
+const PID = {{ pid | tojson }};
+const SESSION_NUMBER = {{ session_number }};
+const TUTOR_MODE = {{ tutor_mode | tojson }};
+const PROBLEM_ID = {{ problem_id | tojson }};
+
+async function submitSurvey(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('submit-btn');
+  const errEl = document.getElementById('error-msg');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  errEl.classList.add('hidden');
+
+  const fd = new FormData(form);
+  const survey = {
+    session_number: SESSION_NUMBER,
+    tutor_mode: TUTOR_MODE,
+    problem_id: PROBLEM_ID,
+    motivation:        parseInt(fd.get('motivation')),
+    engagement:        parseInt(fd.get('engagement')),
+    perceived_support: parseInt(fd.get('perceived_support')),
+    self_confidence:   parseInt(fd.get('self_confidence')),
+    enjoyment:         parseInt(fd.get('enjoyment')),
+    most_helpful:      fd.get('most_helpful') || '',
+    least_helpful:     fd.get('least_helpful') || '',
+    submitted_at:      new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch('/api/surveys', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ participant_id: PID, survey }),
+    });
+    if (!res.ok) throw new Error();
+
+    // Navigate to next step
+    if (SESSION_NUMBER === 1) {
+      window.location.href = `/session/2?pid=${PID}`;
+    } else {
+      window.location.href = `/reflection?pid=${PID}`;
+    }
+  } catch {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Submit & Continue →';
+  }
+}
+</script>
+{% endblock %}

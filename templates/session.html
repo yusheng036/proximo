@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+{% block title %}Session {{ session_number }} — Proximo{% endblock %}
+
+{% block body %}
+<!-- marked.js for markdown rendering in chat -->
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+
+<div class="flex flex-col h-screen">
+
+  <!-- Top bar -->
+  <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-900">AI Tutor</p>
+        <p class="text-xs text-gray-400">Session {{ session_number }} of 2</p>
+      </div>
+    </div>
+    <!-- Progress steps -->
+    <div class="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
+      <span class="px-2 py-0.5 rounded-full {{ 'bg-indigo-100 text-indigo-700 font-medium' if session_number == 1 else 'bg-gray-100' }}">1 Tutor</span>
+      <span>&rarr;</span>
+      <span class="px-2 py-0.5 rounded-full bg-gray-100">1 Survey</span>
+      <span>&rarr;</span>
+      <span class="px-2 py-0.5 rounded-full {{ 'bg-indigo-100 text-indigo-700 font-medium' if session_number == 2 else 'bg-gray-100' }}">2 Tutor</span>
+      <span>&rarr;</span>
+      <span class="px-2 py-0.5 rounded-full bg-gray-100">2 Survey</span>
+      <span>&rarr;</span>
+      <span class="px-2 py-0.5 rounded-full bg-gray-100">Reflection</span>
+    </div>
+    <div id="timer" class="text-sm font-mono text-gray-500">0:00</div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Problem panel (sidebar on desktop, collapsible on mobile) -->
+    <aside class="hidden lg:flex flex-col w-80 flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
+      <div class="p-5">
+        <span class="inline-block text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full mb-3">
+          {{ problem_subject }}
+        </span>
+        <h2 class="text-base font-semibold text-gray-900 mb-3">{{ problem_title }}</h2>
+        <div class="text-sm text-gray-700 leading-relaxed problem-content">
+          {{ problem_description | safe }}
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat area -->
+    <main class="flex flex-col flex-1 overflow-hidden">
+
+      <!-- Mobile: problem toggle -->
+      <div class="lg:hidden border-b border-gray-200 bg-white">
+        <button
+          onclick="toggleProblem()"
+          class="w-full text-left px-4 py-2.5 text-sm text-indigo-600 font-medium flex items-center justify-between"
+        >
+          <span>{{ problem_title }} — tap to view problem</span>
+          <svg id="chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="mobile-problem" class="hidden px-4 pb-4 text-sm text-gray-700 leading-relaxed problem-content">
+          {{ problem_description | safe }}
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Typing indicator -->
+      <div id="typing-indicator" class="hidden px-4 pb-2">
+        <div class="flex items-center gap-2 text-sm text-gray-400">
+          <div class="flex gap-1">
+            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+          </div>
+          <span>Tutor is typing…</span>
+        </div>
+      </div>
+
+      <!-- End session button (hidden until MIN_USER_MESSAGES reached) -->
+      <div id="end-session-wrapper" class="hidden px-4 pb-2">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between gap-4">
+          <p class="text-xs text-emerald-700">Feel free to keep chatting or end the session when you're ready.</p>
+          <button
+            onclick="endSession()"
+            class="flex-shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+          >
+            End Session &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- Input area -->
+      <div class="flex-shrink-0 border-t border-gray-200 bg-white p-4">
+        <div class="flex gap-3 items-end">
+          <textarea
+            id="message-input"
+            rows="2"
+            placeholder="Ask a question or share your thinking…"
+            class="flex-1 resize-none border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            onkeydown="handleKeydown(event)"
+          ></textarea>
+          <button
+            id="send-btn"
+            onclick="sendMessage()"
+            class="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1.5 text-center">Press Enter to send · Shift+Enter for new line</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ── JavaScript ────────────────────────────────────────────────────────────── -->
+<script>
+// ── Constants from server ─────────────────────────────────────────────────────
+const PID             = {{ pid | tojson }};
+const SESSION_NUMBER  = {{ session_number }};
+const TUTOR_MODE      = {{ tutor_mode | tojson }};
+const PROBLEM_ID      = {{ problem_id | tojson }};
+const INITIAL_GREETING = {{ initial_greeting | tojson }};
+const EXISTING_MESSAGES = {{ existing_messages | tojson }};
+const SESSION_ALREADY_STARTED = {{ 'true' if session_already_started else 'false' }};
+const MIN_USER_MESSAGES = 4;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let messages = [];
+let userMessageCount = 0;
+let isStreaming = false;
+let timerInterval = null;
+let startTime = Date.now();
+
+// ── Marked config ─────────────────────────────────────────────────────────────
+marked.setOptions({ breaks: true, gfm: true });
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const s = elapsed % 60;
+    document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  }, 1000);
+}
+
+// ── Problem panel toggle (mobile) ─────────────────────────────────────────────
+function toggleProblem() {
+  const panel = document.getElementById('mobile-problem');
+  const chevron = document.getElementById('chevron');
+  panel.classList.toggle('hidden');
+  chevron.style.transform = panel.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+
+// ── Message rendering ─────────────────────────────────────────────────────────
+function renderMessages(streamingContent = null) {
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+
+  for (const msg of messages) {
+    container.appendChild(buildBubble(msg.role, msg.content));
+  }
+
+  if (streamingContent !== null) {
+    container.appendChild(buildBubble('assistant', streamingContent, true));
+  }
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function buildBubble(role, content, isStreaming = false) {
+  const wrapper = document.createElement('div');
+  wrapper.className = role === 'user'
+    ? 'flex justify-end'
+    : 'flex justify-start';
+
+  const bubble = document.createElement('div');
+
+  if (role === 'user') {
+    bubble.className = 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%] text-sm leading-relaxed whitespace-pre-wrap';
+    bubble.textContent = content;
+  } else {
+    bubble.className = 'bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%] text-sm prose';
+    if (isStreaming && !content) {
+      bubble.innerHTML = '<span class="text-gray-400 italic">…</span>';
+    } else {
+      bubble.innerHTML = marked.parse(content || '');
+    }
+  }
+
+  wrapper.appendChild(bubble);
+  return wrapper;
+}
+
+// ── Initialise session ────────────────────────────────────────────────────────
+async function init() {
+  if (EXISTING_MESSAGES.length > 0) {
+    // Restore existing session
+    messages = EXISTING_MESSAGES;
+    userMessageCount = messages.filter(m => m.role === 'user').length;
+    renderMessages();
+    checkEndSessionVisibility();
+  } else {
+    // New session: add initial greeting and persist it
+    const greeting = {
+      role: 'assistant',
+      content: INITIAL_GREETING,
+      timestamp: new Date().toISOString(),
+    };
+    messages = [greeting];
+    renderMessages();
+
+    // Start session on server
+    await fetch(`/api/participants/${PID}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'start_session',
+        session_number: SESSION_NUMBER,
+        tutor_mode: TUTOR_MODE,
+        problem_id: PROBLEM_ID,
+        messages: messages,
+      }),
+    });
+  }
+
+  startTimer();
+  document.getElementById('message-input').focus();
+}
+
+// ── Send message ──────────────────────────────────────────────────────────────
+async function sendMessage() {
+  const input = document.getElementById('message-input');
+  const content = input.value.trim();
+  if (!content || isStreaming) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  const userMsg = { role: 'user', content, timestamp: new Date().toISOString() };
+  messages.push(userMsg);
+  userMessageCount++;
+  renderMessages();
+
+  setStreaming(true);
+  let streamingContent = '';
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        participant_id: PID,
+        session_number: SESSION_NUMBER,
+        tutor_mode: TUTOR_MODE,
+        problem_id: PROBLEM_ID,
+        messages,
+      }),
+    });
+
+    if (!res.ok) throw new Error('Chat API error');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    document.getElementById('typing-indicator').classList.add('hidden');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      streamingContent += decoder.decode(value, { stream: true });
+      renderMessages(streamingContent);
+    }
+
+    // Finalise
+    const assistantMsg = {
+      role: 'assistant',
+      content: streamingContent,
+      timestamp: new Date().toISOString(),
+    };
+    messages.push(assistantMsg);
+    renderMessages();
+
+    // Persist to server
+    await fetch(`/api/participants/${PID}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'update_messages',
+        session_number: SESSION_NUMBER,
+        messages,
+      }),
+    });
+
+  } catch (err) {
+    console.error(err);
+    const errMsg = {
+      role: 'assistant',
+      content: '_Sorry, something went wrong. Please try again._',
+      timestamp: new Date().toISOString(),
+    };
+    messages.push(errMsg);
+    renderMessages();
+  }
+
+  setStreaming(false);
+  checkEndSessionVisibility();
+  document.getElementById('message-input').focus();
+}
+
+function setStreaming(state) {
+  isStreaming = state;
+  document.getElementById('send-btn').disabled = state;
+  document.getElementById('message-input').disabled = state;
+  if (state) {
+    document.getElementById('typing-indicator').classList.remove('hidden');
+  } else {
+    document.getElementById('typing-indicator').classList.add('hidden');
+  }
+}
+
+function checkEndSessionVisibility() {
+  if (userMessageCount >= MIN_USER_MESSAGES) {
+    document.getElementById('end-session-wrapper').classList.remove('hidden');
+  }
+}
+
+// ── End session ───────────────────────────────────────────────────────────────
+async function endSession() {
+  clearInterval(timerInterval);
+  const btn = document.querySelector('#end-session-wrapper button');
+  btn.disabled = true;
+  btn.textContent = 'Ending…';
+
+  await fetch(`/api/participants/${PID}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      action: 'end_session',
+      session_number: SESSION_NUMBER,
+    }),
+  });
+
+  window.location.href = `/survey/${SESSION_NUMBER}?pid=${PID}`;
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+function handleKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+<style>
+  .problem-content pre { background:#1e293b; color:#e2e8f0; padding:.75em 1em; border-radius:.5em; overflow-x:auto; font-size:.8em; margin:.5em 0; }
+  .problem-content code { font-family:'Menlo','Monaco',monospace; }
+  .problem-content ol { list-style:decimal; padding-left:1.25em; }
+  .problem-content ul { list-style:disc; padding-left:1.25em; }
+  .problem-content li { margin:.25em 0; font-size:.875em; }
+  .problem-content p { margin:.5em 0; font-size:.875em; }
+  .problem-content strong { font-weight:600; }
+</style>
+{% endblock %}

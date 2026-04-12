@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Admin Login — Proximo{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-sm">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <h1 class="text-xl font-bold text-gray-900 mb-1">Admin Access</h1>
+      <p class="text-sm text-gray-500 mb-6">Enter the study admin password.</p>
+
+      <form id="login-form" onsubmit="login(event)">
+        <input
+          id="password-input"
+          type="password"
+          required
+          placeholder="Password"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 text-sm mb-4"
+        />
+        <button
+          type="submit"
+          id="login-btn"
+          class="w-full bg-gray-900 hover:bg-gray-700 disabled:opacity-40 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+        >
+          Sign In
+        </button>
+        <p id="error-msg" class="hidden mt-3 text-red-600 text-sm text-center"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+async function login(e) {
+  e.preventDefault();
+  const password = document.getElementById('password-input').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('error-msg');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  errEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/admin/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({password}),
+    });
+    if (res.ok) {
+      window.location.href = '/admin/dashboard';
+    } else {
+      errEl.textContent = 'Invalid password.';
+      errEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  } catch {
+    errEl.textContent = 'Network error. Try again.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+</script>
+{% endblock %}

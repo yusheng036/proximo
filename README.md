@@ -2,7 +2,7 @@
 
 **Identity-Based AI Tutors for Learning Motivation**
 
-A research prototype for CS 598 (UIUC) investigating whether framing an AI tutor as a student's *future successful self* improves motivation and engagement compared to a standard AI tutor.
+A research prototype for CS 598 investigating whether framing an AI tutor as a student's *future successful self* improves motivation and engagement compared to a standard AI tutor.
 
 ---
 
@@ -150,4 +150,4 @@ The exported CSV has two rows per participant (one per session):
 
 ## Author
 
-Yu Sheng Aow — CS 598, University of Illinois Urbana-Champaign
+Yu Sheng Aow — CS 598, Boston University

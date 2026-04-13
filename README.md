@@ -8,7 +8,7 @@ A research prototype for CS 598 investigating whether framing an AI tutor as a s
 
 ## Research Question
 
-> How does framing an AI tutor as a student's future self affect students' motivation, engagement, and perceived learning support compared to a standard AI tutor?
+How does framing an AI tutor as a student's future self affect students' motivation, engagement, and perceived learning support compared to a standard AI tutor?
 
 ---
 
@@ -19,7 +19,7 @@ Within-subjects experiment with ~8–15 college student participants. Each parti
 | Session | Problem | Concept |
 |---------|---------|---------|
 | 1 | Recursive Fibonacci | Computer Science · Recursion |
-| 2 | Bayes' Theorem (medical test) | Mathematics · Probability |
+| 2 | Bayes' Theorem | Mathematics · Probability |
 
 **Two tutor modes:**
 - **Standard AI Tutor** — conventional tutor that explains concepts, asks guiding questions, and supports problem-solving

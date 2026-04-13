@@ -35,6 +35,8 @@ def create_participant(body: CreateParticipantRequest) -> JSONResponse:
         name=body.name.strip(),
         created_at=_now(),
         session_order=tutor_order,
+        background_cs=body.background_cs,
+        background_math=body.background_math,
         sessions=[None, None],
         surveys=[],
         reflection=None,

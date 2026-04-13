@@ -40,20 +40,21 @@ def _require_admin(admin_token: str | None) -> None:
 # ── Login ──────────────────────────────────────────────────────────────────────
 
 @router.post("/admin/login")
-def admin_login(body: AdminLoginRequest, response: Response) -> JSONResponse:
+def admin_login(body: AdminLoginRequest) -> JSONResponse:
     expected = os.environ.get("ADMIN_PASSWORD", "")
     if not expected or not secrets.compare_digest(body.password, expected):
         raise HTTPException(status_code=401, detail="Invalid password")
 
     token = _make_token(body.password)
-    response.set_cookie(
+    res = JSONResponse({"ok": True})
+    res.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         httponly=True,
         samesite="lax",
         max_age=60 * 60 * 8,  # 8 hours
     )
-    return JSONResponse({"ok": True})
+    return res
 
 
 @router.post("/admin/logout")

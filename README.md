@@ -38,51 +38,30 @@ After each session, participants complete a 5-item Likert survey (motivation, en
 
 ---
 
-## Setup
+## Running the App
 
-**1. Clone and create a virtual environment**
-
-```bash
-git clone <repo-url>
-cd proximo
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-**2. Configure environment variables**
+**1. Activate the virtual environment**
 
 ```bash
-cp .env.example .env
+source .venv/bin/activate
 ```
 
-Edit `.env`:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...
-ADMIN_PASSWORD=your-chosen-password
-ADMIN_SECRET_SALT=random-32-char-string
-```
-
-Generate a salt with:
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
-**3. Run**
+**2. Start the server**
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Open [http://localhost:8000](http://localhost:8000).
+**3. Open the app**
+
+Go to [http://localhost:8000](http://localhost:8000).
 
 ---
 
 ## Study Flow
 
 ```
-/ (welcome + consent)
+/ (welcome + consent + background questions)
   └─ /session/1  (tutoring chat — session 1)
        └─ /survey/1  (post-session survey)
             └─ /session/2  (tutoring chat — session 2)
@@ -95,35 +74,56 @@ Admin dashboard at `/admin` — password protected, shows all participant data, 
 
 ---
 
+## Features
+
+### Participant Background Collection
+On the welcome page, participants self-report their experience level in programming and math (Beginner / Some experience / Comfortable). The tutor adapts its language, pacing, and terminology accordingly:
+- **Beginner** — simple language, more examples, slower pacing
+- **Some experience** — tutor calibrates based on responses
+- **Comfortable** — faster pacing, precise terminology, less scaffolding
+
+### Structured Session Progress
+Each session covers 4 questions in strict sequential order. The tutor never skips ahead — if a student is stuck after 1–2 attempts, the tutor gives the answer and moves on. A progress bar in the chat UI fills one segment per completed question, giving participants a clear sense of pacing and goal. The End Session button unlocks only after all 4 questions are covered.
+
+### Counterbalanced Tutor Assignment
+Tutor order alternates automatically across participants (even → Standard first, odd → Future-Self first) to control for order effects.
+
+### Admin Dashboard
+- Live table of all participants with session status, tutor order, and survey scores
+- Click any row to expand survey results and reflection
+- One-click CSV export for analysis
+
+---
+
 ## Project Structure
 
 ```
 proximo/
-├── main.py                  # FastAPI app + page routes
+├── main.py
 ├── requirements.txt
 ├── .env.example
 ├── src/
-│   ├── models.py            # Pydantic data models
-│   ├── storage.py           # Per-participant JSON file I/O
-│   ├── problems.py          # Problem definitions + initial greetings
-│   ├── prompts.py           # System prompt builders (both tutor modes)
-│   ├── counterbalance.py    # Balanced tutor order assignment
-│   └── csv_export.py        # Flat CSV for data analysis
+│   ├── models.py
+│   ├── storage.py
+│   ├── problems.py
+│   ├── prompts.py
+│   ├── counterbalance.py
+│   └── csv_export.py
 ├── routers/
-│   ├── participants.py      # POST/GET/PATCH /api/participants
-│   ├── chat.py              # POST /api/chat  (streaming)
-│   ├── survey.py            # POST /api/surveys
-│   ├── reflection.py        # POST /api/reflections
-│   └── admin.py             # Admin login, list, CSV export
-├── templates/               # Jinja2 HTML templates
-│   ├── index.html           # Welcome + consent
-│   ├── session.html         # Streaming chat UI
-│   ├── survey.html          # Post-session survey
-│   ├── reflection.html      # Comparative reflection
-│   ├── done.html            # Thank-you + debrief
-│   ├── admin_login.html     # Admin login
-│   └── dashboard.html       # Admin data view
-└── data/participants/       # Participant JSON files (gitignored)
+│   ├── participants.py
+│   ├── chat.py
+│   ├── survey.py
+│   ├── reflection.py
+│   └── admin.py
+├── templates/
+│   ├── index.html
+│   ├── session.html
+│   ├── survey.html
+│   ├── reflection.html
+│   ├── done.html
+│   ├── admin_login.html
+│   └── dashboard.html
+└── data/participants/
 ```
 
 ---

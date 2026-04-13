@@ -33,7 +33,12 @@ def chat_stream(body: ChatRequest) -> StreamingResponse:
     if not participant:
         raise HTTPException(status_code=404, detail="Participant not found")
 
-    system_prompt = build_system_prompt(body.tutor_mode, body.problem_id)
+    system_prompt = build_system_prompt(
+        body.tutor_mode,
+        body.problem_id,
+        background_cs=participant.background_cs,
+        background_math=participant.background_math,
+    )
 
     # Convert to Anthropic message format (exclude system role if present)
     api_messages = [

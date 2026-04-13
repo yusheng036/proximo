@@ -49,6 +49,40 @@
           class="w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm mb-5"
         />
 
+        <!-- Background: programming -->
+        <p class="text-sm font-medium text-gray-700 mb-2">How would you describe your programming experience?</p>
+        <div class="flex gap-3 mb-5">
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="bg_cs" value="beginner" required class="sr-only peer" />
+            <div class="text-center border border-gray-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 rounded-xl py-2.5 px-2 text-sm text-gray-600 transition-colors">Beginner</div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="bg_cs" value="some" class="sr-only peer" />
+            <div class="text-center border border-gray-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 rounded-xl py-2.5 px-2 text-sm text-gray-600 transition-colors">Some experience</div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="bg_cs" value="comfortable" class="sr-only peer" />
+            <div class="text-center border border-gray-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 rounded-xl py-2.5 px-2 text-sm text-gray-600 transition-colors">Comfortable</div>
+          </label>
+        </div>
+
+        <!-- Background: math -->
+        <p class="text-sm font-medium text-gray-700 mb-2">How would you describe your math / probability experience?</p>
+        <div class="flex gap-3 mb-6">
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="bg_math" value="beginner" required class="sr-only peer" />
+            <div class="text-center border border-gray-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 rounded-xl py-2.5 px-2 text-sm text-gray-600 transition-colors">Beginner</div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="bg_math" value="some" class="sr-only peer" />
+            <div class="text-center border border-gray-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 rounded-xl py-2.5 px-2 text-sm text-gray-600 transition-colors">Some experience</div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="bg_math" value="comfortable" class="sr-only peer" />
+            <div class="text-center border border-gray-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 rounded-xl py-2.5 px-2 text-sm text-gray-600 transition-colors">Comfortable</div>
+          </label>
+        </div>
+
         <label class="flex items-start gap-3 mb-6 cursor-pointer">
           <input type="checkbox" required class="mt-0.5 w-4 h-4 accent-indigo-600 flex-shrink-0" />
           <span class="text-sm text-gray-600">I have read the information above and consent to participate in this study.</span>
@@ -76,6 +110,8 @@
 async function startStudy(e) {
   e.preventDefault();
   const name = document.getElementById('name-input').value.trim();
+  const bgCs = document.querySelector('input[name="bg_cs"]:checked')?.value || '';
+  const bgMath = document.querySelector('input[name="bg_math"]:checked')?.value || '';
   const btn = document.getElementById('submit-btn');
   const errEl = document.getElementById('error-msg');
 
@@ -89,7 +125,7 @@ async function startStudy(e) {
     const res = await fetch('/api/participants', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({name}),
+      body: JSON.stringify({name, background_cs: bgCs, background_math: bgMath}),
     });
 
     if (!res.ok) throw new Error('Server error');

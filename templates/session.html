@@ -87,10 +87,27 @@
         </div>
       </div>
 
-      <!-- End session button (hidden until MIN_USER_MESSAGES reached) -->
+      <!-- Progress bar (always visible once session starts) -->
+      <div id="progress-bar-wrapper" class="hidden px-4 pb-2">
+        <div class="bg-white border border-gray-200 rounded-xl p-3">
+          <div class="flex items-center justify-between mb-1.5">
+            <p class="text-xs font-medium text-gray-600">Session progress</p>
+            <p class="text-xs text-gray-400" id="progress-label">0 of 4 topics covered</p>
+          </div>
+          <div class="flex gap-1">
+            <div id="seg-0" class="h-2 flex-1 rounded-full bg-gray-200 transition-colors duration-500"></div>
+            <div id="seg-1" class="h-2 flex-1 rounded-full bg-gray-200 transition-colors duration-500"></div>
+            <div id="seg-2" class="h-2 flex-1 rounded-full bg-gray-200 transition-colors duration-500"></div>
+            <div id="seg-3" class="h-2 flex-1 rounded-full bg-gray-200 transition-colors duration-500"></div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5" id="progress-hint">Answer or work through each question with your tutor to move forward.</p>
+        </div>
+      </div>
+
+      <!-- End session button (shown once all 4 topics covered) -->
       <div id="end-session-wrapper" class="hidden px-4 pb-2">
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between gap-4">
-          <p class="text-xs text-emerald-700">Feel free to keep chatting or end the session when you're ready.</p>
+          <p class="text-xs text-emerald-700">Great work — you can keep chatting or end the session when you're ready.</p>
           <button
             onclick="endSession()"
             class="flex-shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
@@ -136,11 +153,15 @@ const PROBLEM_ID      = {{ problem_id | tojson }};
 const INITIAL_GREETING = {{ initial_greeting | tojson }};
 const EXISTING_MESSAGES = {{ existing_messages | tojson }};
 const SESSION_ALREADY_STARTED = {{ 'true' if session_already_started else 'false' }};
-const MIN_USER_MESSAGES = 4;
+const MIN_USER_MESSAGES = 1;
+const TOTAL_TOPICS = 4;
+// Matches when the tutor moves to the next question
+const TOPIC_DONE_RE = /question\s*\d+\s*done/i;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let messages = [];
 let userMessageCount = 0;
+let milestoneCount = 0;
 let isStreaming = false;
 let timerInterval = null;
 let startTime = Date.now();
@@ -212,6 +233,8 @@ async function init() {
     // Restore existing session
     messages = EXISTING_MESSAGES;
     userMessageCount = messages.filter(m => m.role === 'user').length;
+    // Recompute milestones from tutor messages
+    milestoneCount = messages.filter(m => m.role === 'assistant' && TOPIC_DONE_RE.test(m.content)).length;
     renderMessages();
     checkEndSessionVisibility();
   } else {
@@ -293,6 +316,17 @@ async function sendMessage() {
       timestamp: new Date().toISOString(),
     };
     messages.push(assistantMsg);
+    // Advance progress bar if tutor signalled a topic transition
+    if (TOPIC_DONE_RE.test(streamingContent) && milestoneCount < TOTAL_TOPICS) {
+      milestoneCount++;
+      checkEndSessionVisibility();
+    }
+    // Fallback: if on last topic and tutor gives a wrap-up/recap, complete the bar
+    const isRecap = /\b(recap|key insight|session complete|well done today|you did (great|awesome|really well)|good luck)\b/i.test(streamingContent);
+    if (isRecap && milestoneCount === TOTAL_TOPICS - 1) {
+      milestoneCount++;
+      checkEndSessionVisibility();
+    }
     renderMessages();
 
     // Persist to server
@@ -334,7 +368,36 @@ function setStreaming(state) {
 }
 
 function checkEndSessionVisibility() {
-  if (userMessageCount >= MIN_USER_MESSAGES) {
+  if (userMessageCount < MIN_USER_MESSAGES) return;
+
+  // Always show progress bar once session has started
+  document.getElementById('progress-bar-wrapper').classList.remove('hidden');
+
+  // Update segments
+  for (let i = 0; i < TOTAL_TOPICS; i++) {
+    const seg = document.getElementById(`seg-${i}`);
+    seg.className = 'h-2 flex-1 rounded-full transition-colors duration-500 ' +
+      (i < milestoneCount ? 'bg-indigo-500' : 'bg-gray-200');
+  }
+
+  // Update label
+  document.getElementById('progress-label').textContent =
+    `${milestoneCount} of ${TOTAL_TOPICS} topics covered`;
+
+  // Update hint text
+  const remaining = TOTAL_TOPICS - milestoneCount;
+  let hint = '';
+  if (remaining === 0) {
+    hint = "You've covered all the topics — well done!";
+  } else if (remaining === 1) {
+    hint = 'Almost there — work through one more topic to finish.';
+  } else {
+    hint = `Work through each question — confirm understanding or move on to progress.`;
+  }
+  document.getElementById('progress-hint').textContent = hint;
+
+  // Unlock End Session when all topics done
+  if (milestoneCount >= TOTAL_TOPICS) {
     document.getElementById('end-session-wrapper').classList.remove('hidden');
   }
 }

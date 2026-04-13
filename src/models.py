@@ -51,6 +51,8 @@ class ParticipantRecord(BaseModel):
     name: str
     created_at: str  # ISO-8601
     session_order: tuple[TutorMode, TutorMode]
+    background_cs: str = ""
+    background_math: str = ""
     sessions: list[Optional[SessionRecord]] = [None, None]
     surveys: list[SurveyResponse] = []
     reflection: Optional[ReflectionResponse] = None
@@ -61,6 +63,8 @@ class ParticipantRecord(BaseModel):
 
 class CreateParticipantRequest(BaseModel):
     name: str
+    background_cs: str = ""   # e.g. "beginner", "some", "comfortable"
+    background_math: str = "" # e.g. "beginner", "some", "comfortable"
 
 
 class PatchParticipantRequest(BaseModel):

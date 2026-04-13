@@ -10,7 +10,7 @@ Each problem carries:
 
 from __future__ import annotations
 
-MIN_USER_MESSAGES = 4  # minimum exchanges before "End Session" is enabled
+MIN_USER_MESSAGES = 4
 
 PROBLEMS: dict[str, dict] = {
     "fibonacci": {
@@ -27,12 +27,14 @@ Each number is the sum of the two before it.</p>
         return n
     return fib(n - 1) + fib(n - 2)</code></pre>
 
-<p><strong>Questions to explore with your tutor:</strong></p>
+<p><strong>Try this before you start:</strong> Grab a piece of paper (or just think it through) and try to trace what happens step-by-step when Python runs <code>fib(4)</code>. What functions get called, and in what order?</p>
+
+<p><strong>Work through these with your tutor:</strong></p>
 <ol>
-  <li>What are the <em>base cases</em> and why are they necessary?</li>
-  <li>Can you trace every call that happens when you run <code>fib(4)</code>?</li>
-  <li>Why is this naive implementation inefficient for large <code>n</code>?</li>
-  <li>How could <em>memoization</em> or dynamic programming fix that?</li>
+  <li>What are the <em>base cases</em> (<code>n = 0</code> and <code>n = 1</code>) and why do they prevent infinite recursion?</li>
+  <li>Trace <strong>every single call</strong> made by <code>fib(4)</code> — draw it out as a tree if it helps.</li>
+  <li>Count how many times <code>fib(2)</code> is computed. Why is that wasteful?</li>
+  <li>How would you fix it with <em>memoization</em>? Try writing a version yourself.</li>
 </ol>
 """,
         "initial_greetings": {
@@ -51,10 +53,11 @@ Each number is the sum of the two before it.</p>
                 "I remember sitting exactly where you are, staring at that `fib` function "
                 "and thinking *\"wait, it calls itself? That can't work.\"* That confusion "
                 "is completely normal — we both had it.\n\n"
-                "I'm here to walk you through the exact moment this clicked for me, because "
-                "I know it's going to click for you too.\n\n"
-                "First though — **what's your gut reaction to this code?** What part feels "
-                "confusing or circular to you right now?"
+                "The thing that finally made it click for me wasn't reading an explanation — "
+                "it was actually tracing through `fib(4)` by hand, one call at a time, until "
+                "I could see the whole tree. We're going to do that together.\n\n"
+                "But first — **did you try tracing `fib(4)` before we started?** "
+                "What did you get, or where did you get lost?"
             ),
         },
     },
@@ -92,22 +95,19 @@ A medical test for it has the following properties:</p>
                 "probability would you guess that you actually have the disease?"
             ),
             "future-self": (
-                "Okay, round two — and I have to warn you about something.\n\n"
-                "When I first saw this problem I read \"99% accurate test, positive result\" "
-                "and immediately thought \"so there's a 99% chance I have it.\" "
-                "I was *very* confident. And completely wrong.\n\n"
-                "The real answer genuinely surprised me, and understanding *why* it's "
-                "surprising is one of the most useful things I ever learned about "
-                "probability. It changed how I think about news stories, medical reports, "
-                "all kinds of things.\n\n"
-                "So — **what's your first instinct?** Don't overthink it yet. "
-                "Just tell me the number that comes to mind when you read the problem."
+                "Hey, it's me again — your future self.\n\n"
+                "This one is about probability, and I want to be upfront: "
+                "the answer is probably not what you'd expect. I got it wrong the first time too, "
+                "and it genuinely surprised me when I worked out why.\n\n"
+                "Take a moment to read through the scenario above.\n\n"
+                "**What probability comes to mind when you first read it?** "
+                "Just go with your gut — no wrong answers at this stage."
             ),
         },
     },
 }
 
-PROBLEM_ORDER: list[str] = ["fibonacci", "bayes"]  # session 1 → session 2
+PROBLEM_ORDER: list[str] = ["fibonacci", "bayes"]
 
 
 def get_problem_for_session(session_number: int) -> dict:

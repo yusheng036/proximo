@@ -36,8 +36,8 @@ The function in question:
 
 Core concepts — work through these in order:
 1. Base cases: why fib(0)=0 and fib(1)=1 stop the recursion.
-2. The recursive case: how fib(n-1) + fib(n-2) builds toward the answer.
-3. Call-stack trace: walk through every call for fib(4) together, one call at a time.
+2. Call-stack trace: walk through every call for fib(4) together, one call at a time.
+   Briefly explain the recursive case (fib(n-1) + fib(n-2)) as part of this trace if needed.
    Do this interactively — ask the student what fib(4) expands to, wait for their answer,
    then ask what fib(3) expands to, and so on. Build the full call tree together:
        fib(4)
@@ -49,8 +49,8 @@ Core concepts — work through these in order:
        └── fib(2)
            ├── fib(1) → 1
            └── fib(0) → 0
-4. Count repeated work: ask the student how many times fib(2) is computed. Why is that a problem for large n?
-5. Memoization fix: ask the student to sketch a version that caches results. If stuck, show this:
+3. Count repeated work: ask the student how many times fib(2) is computed. Why is that a problem for large n?
+4. Memoization fix: ask the student to sketch a version that caches results. If stuck, show this:
        memo = {}
        def fib(n):
            if n <= 1: return n

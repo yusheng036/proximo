@@ -40,10 +40,11 @@ After each session, participants complete a 5-item Likert survey (motivation, en
 
 ## Running the App
 
-**1. Activate the virtual environment**
+**1. Activate the virtual environment and install dependencies**
 
 ```bash
 source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 **2. Start the server**

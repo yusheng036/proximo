@@ -1,14 +1,3 @@
-"""Counterbalanced assignment of tutor order.
-
-Uses a persistent counter so participants alternate:
-  Even counter → ['standard', 'future-self']
-  Odd  counter → ['future-self', 'standard']
-
-Node.js-style note: Python's GIL + synchronous file I/O is safe here
-because FastAPI runs a single process in development and the study has
-at most ~15 participants, so concurrent creates are extremely unlikely.
-"""
-
 from __future__ import annotations
 
 import json

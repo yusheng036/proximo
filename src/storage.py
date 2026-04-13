@@ -1,12 +1,3 @@
-"""File-based storage for participant records.
-
-Each participant is stored as an individual JSON file:
-    data/participants/{participant_id}.json
-
-This is intentionally simple — the study involves at most ~15 participants
-and sessions are sequential, so there is no meaningful write concurrency.
-"""
-
 from __future__ import annotations
 
 import json

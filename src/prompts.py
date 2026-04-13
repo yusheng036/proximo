@@ -96,7 +96,6 @@ def build_system_prompt(
 ) -> str:
     content = _FIBONACCI_CONTENT if problem_id == "fibonacci" else _BAYES_CONTENT
 
-    # Build a short adaptive note based on the student's background
     relevant_bg = background_cs if problem_id == "fibonacci" else background_math
     subject = "programming" if problem_id == "fibonacci" else "mathematics"
     if relevant_bg == "beginner":
@@ -118,7 +117,7 @@ def build_system_prompt(
 Begin each response naturally, without prefacing with "As your tutor" or similar.
 """
 
-    else:  # future-self
+    else:
         return f"""You are the student's future self — the same person, a few years from now, who has fully mastered this material and is looking back to guide their earlier self through a challenging topic.
 
 Identity rules (follow these precisely):

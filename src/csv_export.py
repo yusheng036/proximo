@@ -1,5 +1,3 @@
-"""Export all participant data to CSV for analysis."""
-
 from __future__ import annotations
 
 import csv
@@ -60,7 +58,7 @@ def participants_to_csv(participants: list[ParticipantRecord]) -> str:
                 "enjoyment": survey.enjoyment if survey else "",
                 "most_helpful": survey.most_helpful if survey else "",
                 "least_helpful": survey.least_helpful if survey else "",
-                # Reflection (repeated on both rows for this participant)
+                # Reflection
                 "more_motivating_session": reflection.more_motivating_session if reflection else "",
                 "more_motivating_reason": reflection.more_motivating_reason if reflection else "",
                 "free_form_comments": reflection.free_form_comments if reflection else "",

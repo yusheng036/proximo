@@ -71,6 +71,7 @@
             <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">S1</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">S2</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+            <th class="px-4 py-3"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -127,6 +128,12 @@
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Not started</span>
               {% endif %}
             </td>
+            <td class="px-4 py-3" onclick="event.stopPropagation()">
+              <button
+                onclick="deleteParticipant('{{ p.id }}', '{{ p.name }}')"
+                class="text-xs text-red-400 hover:text-red-600 transition-colors"
+              >Delete</button>
+            </td>
           </tr>
           <!-- Expandable detail row -->
           <tr id="detail-{{ loop.index }}" class="hidden bg-gray-50">
@@ -180,6 +187,16 @@
 function toggleDetail(id) {
   const row = document.getElementById(id);
   row.classList.toggle('hidden');
+}
+
+async function deleteParticipant(id, name) {
+  if (!confirm(`Delete participant "${name}"? This cannot be undone.`)) return;
+  const res = await fetch(`/admin/participants/${id}`, { method: 'DELETE' });
+  if (res.ok) {
+    location.reload();
+  } else {
+    alert('Failed to delete participant.');
+  }
 }
 </script>
 {% endblock %}

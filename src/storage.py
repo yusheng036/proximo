@@ -31,6 +31,14 @@ def get_participant(participant_id: str) -> Optional[ParticipantRecord]:
     return ParticipantRecord.model_validate(data)
 
 
+def delete_participant(participant_id: str) -> bool:
+    path = _participant_path(participant_id)
+    if not path.exists():
+        return False
+    path.unlink()
+    return True
+
+
 def get_all_participants() -> list[ParticipantRecord]:
     _ensure_data_dir()
     records: list[ParticipantRecord] = []

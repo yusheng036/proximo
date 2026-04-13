@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse, RedirectResponse, Response
 
 from src.csv_export import participants_to_csv
 from src.models import AdminLoginRequest
-from src.storage import get_all_participants
+from src.storage import delete_participant, get_all_participants
 
 router = APIRouter(tags=["admin"])
 
@@ -70,6 +70,18 @@ def list_participants(admin_token: str | None = Cookie(default=None)) -> JSONRes
     _require_admin(admin_token)
     participants = get_all_participants()
     return JSONResponse([p.model_dump() for p in participants])
+
+
+@router.delete("/admin/participants/{participant_id}")
+def delete_participant_route(
+    participant_id: str,
+    admin_token: str | None = Cookie(default=None),
+) -> JSONResponse:
+    _require_admin(admin_token)
+    deleted = delete_participant(participant_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Participant not found")
+    return JSONResponse({"ok": True})
 
 
 @router.get("/admin/export.csv")

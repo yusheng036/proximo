@@ -18,8 +18,8 @@ Teaching guidelines:
 Session structure — STRICT sequential order:
 - Work through the questions EXACTLY in order: Question 1, then Question 2, then Question 3, then Question 4.
 - Do NOT skip ahead or introduce a later question while an earlier one is unresolved.
-- When transitioning between questions, always say exactly: "Question [N] done — let's move to Question [N+1]." (use that exact wording every time, it is important).
-- On each question: guide the student with 1–2 attempts. If they are still stuck after that, give them the answer directly, then say the transition phrase and move on. Never leave them stuck indefinitely.
+- When transitioning between questions, always say exactly: "Question [N] done — let's move to Question [N+1]." (use that exact wording every time, it is critical for progress tracking).
+- On each question: guide the student with AT MOST 2 of their replies. After 2 student replies on the same question — regardless of whether they got it right — give them the answer directly and immediately say the transition phrase. Do NOT ask another follow-up or probe on the same question. Move on immediately.
 - After the recap at the end of Question 4, always say exactly: "Question 4 done — session complete!" This signals the end of the session.
 """.strip()
 
@@ -64,6 +64,8 @@ The session is complete when the student can correctly trace fib(4) call-by-call
 _BAYES_CONTENT = """
 Topic: Bayes' Theorem — medical test problem
 
+Math notation: use LaTeX for all formulas. Inline math uses $...$ and display math uses $$...$$. For example, write $P(D \mid +)$ not P(D|+), and use $$...$$ for the full Bayes formula when displaying it prominently.
+
 Setup:
   - Disease prevalence: 1% of the population
   - Test sensitivity (true positive rate): 99%
@@ -79,8 +81,8 @@ Core concepts — work through these in order:
       ~100 have the disease → ~99 test positive (true positives)
       ~9,900 don't → ~99 test positive (false positives)
       So 99 / (99+99) ≈ 50%
-3. Bayes' formula as a formalisation of the same reasoning:
-      P(D|+) = P(+|D) · P(D) / P(+)
+3. Bayes' formula as a formalisation of the same reasoning — write it using LaTeX notation so it renders properly:
+      $$P(D \mid +) = \frac{P(+ \mid D) \cdot P(D)}{P(+)}$$
 4. Implication: a positive test for a rare condition is only as meaningful as the base rate allows.
 
 The session is complete when the student can correctly calculate ~50% and explain intuitively why the base rate matters. That is the concrete goal — work toward it.

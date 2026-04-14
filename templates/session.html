@@ -4,6 +4,11 @@
 {% block body %}
 <!-- marked.js for markdown rendering in chat -->
 <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<!-- KaTeX for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="window._katexReady = true"></script>
 
 <div class="flex flex-col h-screen">
 
@@ -156,7 +161,7 @@ const SESSION_ALREADY_STARTED = {{ 'true' if session_already_started else 'false
 const MIN_USER_MESSAGES = 1;
 const TOTAL_TOPICS = 4;
 // Matches when the tutor moves to the next question
-const TOPIC_DONE_RE = /question\s*\d+\s*done/i;
+const TOPIC_DONE_RE = /question\s*\d+\s*(?:is\s+)?(?:done|complete[d]?|finished)/i;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let messages = [];
@@ -220,6 +225,15 @@ function buildBubble(role, content, isStreaming = false) {
       bubble.innerHTML = '<span class="text-gray-400 italic">…</span>';
     } else {
       bubble.innerHTML = marked.parse(content || '');
+      if (window._katexReady) {
+        renderMathInElement(bubble, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+          ],
+          throwOnError: false,
+        });
+      }
     }
   }
 

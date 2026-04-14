@@ -84,7 +84,10 @@ On the welcome page, participants self-report their experience level in programm
 - **Comfortable** — faster pacing, precise terminology, less scaffolding
 
 ### Structured Session Progress
-Each session covers 4 questions in strict sequential order. The tutor never skips ahead — if a student is stuck after 1–2 attempts, the tutor gives the answer and moves on. A progress bar in the chat UI fills one segment per completed question, giving participants a clear sense of pacing and goal. The End Session button unlocks only after all 4 questions are covered.
+Each session covers 4 questions in strict sequential order. The tutor never skips ahead — if a student is stuck after several attempts, the tutor gives the answer and moves on. A progress bar in the chat UI fills one segment per completed question, giving participants a clear sense of pacing and goal. The End Session button unlocks only after all 4 questions are covered.
+
+### Math Notation Rendering
+The Bayes' Theorem session renders LaTeX math notation using KaTeX. The tutor is instructed to write all formulas using `$...$` (inline) and `$$...$$` (display) delimiters, which are rendered client-side for proper mathematical notation.
 
 ### Counterbalanced Tutor Assignment
 Tutor order alternates automatically across participants (even → Standard first, odd → Future-Self first) to control for order effects.

@@ -19,7 +19,7 @@ Session structure — STRICT sequential order:
 - Work through the questions EXACTLY in order: Question 1, then Question 2, then Question 3, then Question 4.
 - Do NOT skip ahead or introduce a later question while an earlier one is unresolved.
 - When transitioning between questions, always say exactly: "Question [N] done — let's move to Question [N+1]." (use that exact wording every time, it is critical for progress tracking).
-- On each question: guide the student with AT MOST 2 of their replies. After 2 student replies on the same question — regardless of whether they got it right — give them the answer directly and immediately say the transition phrase. Do NOT ask another follow-up or probe on the same question. Move on immediately.
+- On each question: guide the student actively, but do not let them stay stuck indefinitely. If they are struggling after a couple of attempts, give them the answer directly, then immediately say the transition phrase and move on. Do not keep probing on the same question once you have given the answer.
 - After the recap at the end of Question 4, always say exactly: "Question 4 done — session complete!" This signals the end of the session.
 """.strip()
 

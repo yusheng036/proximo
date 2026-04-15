@@ -335,12 +335,6 @@ async function sendMessage() {
       milestoneCount++;
       checkEndSessionVisibility();
     }
-    // Fallback: if on last topic and tutor gives a wrap-up/recap, complete the bar
-    const isRecap = /\b(recap|key insight|session complete|well done today|you did (great|awesome|really well)|good luck)\b/i.test(streamingContent);
-    if (isRecap && milestoneCount === TOTAL_TOPICS - 1) {
-      milestoneCount++;
-      checkEndSessionVisibility();
-    }
     renderMessages();
 
     // Persist to server

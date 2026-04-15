@@ -18,7 +18,7 @@ Within-subjects experiment with ~8–15 college student participants. Each parti
 
 | Session | Problem | Concept |
 |---------|---------|---------|
-| 1 | Recursive Fibonacci | Computer Science · Recursion |
+| 1 | Weighted Interval Scheduling | Computer Science · Dynamic Programming |
 | 2 | Bayes' Theorem | Mathematics · Probability |
 
 **Two tutor modes:**

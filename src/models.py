@@ -4,7 +4,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel
 
 TutorMode = Literal["standard", "future-self"]
-ProblemId = Literal["fibonacci", "bayes"]
+ProblemId = Literal["weighted_intervals", "bayes"]
 SessionNumber = Literal[1, 2]
 
 
@@ -23,6 +23,9 @@ class SurveyResponse(BaseModel):
     perceived_support: int
     self_confidence: int
     enjoyment: int
+    clarity: int
+    trust: int
+    perceived_learning: int
     most_helpful: str
     least_helpful: str
     submitted_at: str
@@ -31,6 +34,7 @@ class SurveyResponse(BaseModel):
 class ReflectionResponse(BaseModel):
     more_motivating_session: Optional[int] = None
     more_motivating_reason: str
+    more_comprehensible_session: Optional[int] = None
     free_form_comments: str
     submitted_at: str
 

@@ -30,6 +30,9 @@
             ("perceived_support",  "The tutor effectively supported my understanding."),
             ("self_confidence",    "I feel more confident in my ability to tackle similar problems."),
             ("enjoyment",          "I enjoyed this tutoring session."),
+            ("clarity",            "I was able to follow the tutor's explanations clearly."),
+            ("trust",              "I felt I could trust the tutor's guidance."),
+            ("perceived_learning", "I feel I genuinely understood the concept by the end of the session."),
           ] %}
 
           {% for name, label in questions %}
@@ -121,13 +124,16 @@ async function submitSurvey(e) {
     session_number: SESSION_NUMBER,
     tutor_mode: TUTOR_MODE,
     problem_id: PROBLEM_ID,
-    motivation:        parseInt(fd.get('motivation')),
-    engagement:        parseInt(fd.get('engagement')),
-    perceived_support: parseInt(fd.get('perceived_support')),
-    self_confidence:   parseInt(fd.get('self_confidence')),
-    enjoyment:         parseInt(fd.get('enjoyment')),
-    most_helpful:      fd.get('most_helpful') || '',
-    least_helpful:     fd.get('least_helpful') || '',
+    motivation:         parseInt(fd.get('motivation')),
+    engagement:         parseInt(fd.get('engagement')),
+    perceived_support:  parseInt(fd.get('perceived_support')),
+    self_confidence:    parseInt(fd.get('self_confidence')),
+    enjoyment:          parseInt(fd.get('enjoyment')),
+    clarity:            parseInt(fd.get('clarity')),
+    trust:              parseInt(fd.get('trust')),
+    perceived_learning: parseInt(fd.get('perceived_learning')),
+    most_helpful:       fd.get('most_helpful') || '',
+    least_helpful:      fd.get('least_helpful') || '',
     submitted_at:      new Date().toISOString(),
   };
 

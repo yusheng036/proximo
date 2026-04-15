@@ -13,51 +13,62 @@ from __future__ import annotations
 MIN_USER_MESSAGES = 4
 
 PROBLEMS: dict[str, dict] = {
-    "fibonacci": {
-        "id": "fibonacci",
-        "title": "Recursive Fibonacci",
-        "subject": "Computer Science · Recursion",
+    "weighted_intervals": {
+        "id": "weighted_intervals",
+        "title": "Weighted Interval Scheduling",
+        "subject": "Computer Science · Dynamic Programming",
         "description": """
-<p>The <strong>Fibonacci sequence</strong> starts: 0, 1, 1, 2, 3, 5, 8, 13, 21 …
-Each number is the sum of the two before it.</p>
+<p>You have <strong>5 jobs</strong>, each with a start time, finish time, and value.
+Two jobs are <em>compatible</em> if they do not overlap.
+Your goal: select a subset of mutually compatible jobs with <strong>maximum total value</strong>.</p>
 
-<p>Here is a simple recursive implementation:</p>
-<pre><code>def fib(n):
-    if n &lt;= 1:
-        return n
-    return fib(n - 1) + fib(n - 2)</code></pre>
+<table style="border-collapse:collapse; font-size:0.9em; margin: 0.75rem 0;">
+  <thead>
+    <tr>
+      <th style="border:1px solid #d1d5db; padding:6px 12px;">Job</th>
+      <th style="border:1px solid #d1d5db; padding:6px 12px;">Start</th>
+      <th style="border:1px solid #d1d5db; padding:6px 12px;">Finish</th>
+      <th style="border:1px solid #d1d5db; padding:6px 12px;">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">1</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">1</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">3</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">2</td></tr>
+    <tr><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">2</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">2</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">5</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">4</td></tr>
+    <tr><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">3</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">3</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">7</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">4</td></tr>
+    <tr><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">4</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">6</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">9</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">7</td></tr>
+    <tr><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">5</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">5</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">10</td><td style="border:1px solid #d1d5db; padding:6px 12px; text-align:center;">3</td></tr>
+  </tbody>
+</table>
 
-<p><strong>Try this before you start:</strong> Grab a piece of paper (or just think it through) and try to trace what happens step-by-step when Python runs <code>fib(4)</code>. What functions get called, and in what order?</p>
+<p><strong>Think about this before you start:</strong> Could a simple greedy strategy — always pick the highest-value job, or the job that finishes earliest — reliably find the best answer?</p>
 
 <p><strong>Work through these with your tutor:</strong></p>
 <ol>
-  <li>What are the <em>base cases</em> (<code>n = 0</code> and <code>n = 1</code>) and why do they prevent infinite recursion?</li>
-  <li>Trace <strong>every single call</strong> made by <code>fib(4)</code> — draw it out as a tree if it helps.</li>
-  <li>Count how many times <code>fib(2)</code> is computed. Why is that wasteful?</li>
-  <li>How would you fix it with <em>memoization</em>? Try writing a version yourself.</li>
+  <li>Why does every greedy strategy fail on some input?</li>
+  <li>What is the right <em>subproblem</em>? Define <code>OPT(j)</code> and the helper <code>p(j)</code>.</li>
+  <li>Derive the recurrence: for each job <em>j</em>, what are the only two choices, and which is better?</li>
+  <li>Fill in the DP table from <code>OPT(0)</code> to <code>OPT(5)</code> and identify which jobs to select.</li>
 </ol>
 """,
         "initial_greetings": {
             "standard": (
-                "Hi! I'm your AI tutor for this session. Today we'll be working through "
-                "recursive functions using the Fibonacci sequence as our example — it's a "
-                "classic topic that reveals a lot about how recursion really works.\n\n"
-                "Before I explain anything, I'd love to know where you're starting from: "
-                "**What do you already know about recursion?** Have you seen it before, "
-                "or is this mostly new territory?"
+                "Hi! I'm your AI tutor for this session. Today we're tackling "
+                "**weighted interval scheduling** — a scheduling problem where greedy "
+                "strategies break down and dynamic programming is the key.\n\n"
+                "Before I explain anything: take a look at the five jobs in the table above. "
+                "**What's your instinct for a strategy to maximise total value?** "
+                "Don't worry about being right — just tell me what you'd try first."
             ),
             "future-self": (
-                "Hey — okay, this is going to sound a little strange, but stick with me: "
-                "I'm you. Future you, specifically. A few years from now, after you've "
-                "gotten really comfortable with this stuff.\n\n"
-                "I remember sitting exactly where you are, staring at that `fib` function "
-                "and thinking *\"wait, it calls itself? That can't work.\"* That confusion "
-                "is completely normal — we both had it.\n\n"
-                "The thing that finally made it click for me wasn't reading an explanation — "
-                "it was actually tracing through `fib(4)` by hand, one call at a time, until "
-                "I could see the whole tree. We're going to do that together.\n\n"
-                "But first — **did you try tracing `fib(4)` before we started?** "
-                "What did you get, or where did you get lost?"
+                "Hey — it's me. Future you.\n\n"
+                "This one is a scheduling problem, and I want to warn you upfront: "
+                "every clean greedy idea you're about to think of is going to fail. "
+                "I know because I thought of all of them too.\n\n"
+                "The moment it clicked for me was when I stopped asking *\"which job should I pick next?\"* "
+                "and started asking *\"what's the right subproblem?\"* — that's the whole game with DP.\n\n"
+                "Take a look at the table above. "
+                "**What strategy would you try first to maximise the total value?** "
+                "Go with your gut — I want to see where your head is at."
             ),
         },
     },
@@ -107,7 +118,7 @@ A medical test for it has the following properties:</p>
     },
 }
 
-PROBLEM_ORDER: list[str] = ["fibonacci", "bayes"]
+PROBLEM_ORDER: list[str] = ["weighted_intervals", "bayes"]
 
 
 def get_problem_for_session(session_number: int) -> dict:

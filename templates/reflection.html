@@ -17,7 +17,7 @@
     <div class="grid grid-cols-2 gap-4 mb-6">
       <div class="bg-white border border-gray-200 rounded-xl p-4">
         <p class="text-xs font-medium text-gray-400 mb-1">SESSION 1</p>
-        <p class="text-sm font-semibold text-gray-800">Recursive Fibonacci</p>
+        <p class="text-sm font-semibold text-gray-800">Weighted Interval Scheduling</p>
         <p class="text-xs text-gray-500 mt-0.5">Computer Science</p>
       </div>
       <div class="bg-white border border-gray-200 rounded-xl p-4">
@@ -51,7 +51,28 @@
           </div>
         </div>
 
-        <!-- Q2: Why -->
+        <!-- Q2: Which session was easier to follow -->
+        <div>
+          <p class="text-sm font-medium text-gray-800 mb-3">
+            Thinking about <em>clarity and ease of understanding</em>, which session was easier to follow?
+          </p>
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="more_comprehensible_session" value="1" required class="accent-indigo-600">
+              <span class="text-sm text-gray-700">Session 1 was easier to follow</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="more_comprehensible_session" value="2" required class="accent-indigo-600">
+              <span class="text-sm text-gray-700">Session 2 was easier to follow</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="more_comprehensible_session" value="0" required class="accent-indigo-600">
+              <span class="text-sm text-gray-700">No preference — both were similarly clear</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3: Why motivating -->
         <div>
           <label class="block text-sm font-medium text-gray-800 mb-2">
             Can you describe what specifically made one feel more (or less) motivating than the other?
@@ -106,10 +127,13 @@ async function submitReflection(e) {
 
   const raw = fd.get('more_motivating_session');
   const sessionVal = raw === '0' ? null : parseInt(raw);
+  const rawComp = fd.get('more_comprehensible_session');
+  const compVal = rawComp === '0' ? null : parseInt(rawComp);
 
   const reflection = {
     more_motivating_session: sessionVal,
     more_motivating_reason: fd.get('more_motivating_reason') || '',
+    more_comprehensible_session: compVal,
     free_form_comments: fd.get('free_form_comments') || '',
     submitted_at: new Date().toISOString(),
   };

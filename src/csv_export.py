@@ -18,10 +18,14 @@ COLUMNS = [
     "perceived_support",
     "self_confidence",
     "enjoyment",
+    "clarity",
+    "trust",
+    "perceived_learning",
     "most_helpful",
     "least_helpful",
     "more_motivating_session",
     "more_motivating_reason",
+    "more_comprehensible_session",
     "free_form_comments",
 ]
 
@@ -56,11 +60,15 @@ def participants_to_csv(participants: list[ParticipantRecord]) -> str:
                 "perceived_support": survey.perceived_support if survey else "",
                 "self_confidence": survey.self_confidence if survey else "",
                 "enjoyment": survey.enjoyment if survey else "",
+                "clarity": survey.clarity if survey else "",
+                "trust": survey.trust if survey else "",
+                "perceived_learning": survey.perceived_learning if survey else "",
                 "most_helpful": survey.most_helpful if survey else "",
                 "least_helpful": survey.least_helpful if survey else "",
                 # Reflection
                 "more_motivating_session": reflection.more_motivating_session if reflection else "",
                 "more_motivating_reason": reflection.more_motivating_reason if reflection else "",
+                "more_comprehensible_session": reflection.more_comprehensible_session if reflection else "",
                 "free_form_comments": reflection.free_form_comments if reflection else "",
             }
             writer.writerow(row)

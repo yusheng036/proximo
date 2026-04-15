@@ -423,14 +423,19 @@ async function endSession() {
   btn.disabled = true;
   btn.textContent = 'Ending…';
 
-  await fetch(`/api/participants/${PID}`, {
-    method: 'PATCH',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      action: 'end_session',
-      session_number: SESSION_NUMBER,
-    }),
-  });
+  try {
+    await fetch(`/api/participants/${PID}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'end_session',
+        session_number: SESSION_NUMBER,
+      }),
+    });
+  } catch (_) {
+    // Navigate regardless — a missing ended_at timestamp is recoverable,
+    // leaving the participant stuck on this screen is not.
+  }
 
   window.location.href = `/survey/${SESSION_NUMBER}?pid=${PID}`;
 }

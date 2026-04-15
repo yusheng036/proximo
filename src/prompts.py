@@ -18,9 +18,9 @@ Teaching guidelines:
 Session structure — STRICT sequential order:
 - Work through the questions EXACTLY in order: Question 1, then Question 2, then Question 3, then Question 4.
 - Do NOT skip ahead or introduce a later question while an earlier one is unresolved.
-- When transitioning between questions, always say exactly: "Question [N] done — let's move to Question [N+1]." (use that exact wording every time, it is critical for progress tracking).
+- When transitioning between questions, always say exactly: **"Question [N] done — let's move to Question [N+1]."** (use that exact wording, bolded, every time — it is critical for progress tracking).
 - On each question: guide the student actively, but do not let them stay stuck indefinitely. If they are struggling after a couple of attempts, give them the answer directly, then immediately say the transition phrase. After the transition phrase, pose only the opening question for the next topic and then stop — wait for the student to respond before continuing. Do not answer the next question yourself in the same message.
-- After the recap at the end of Question 4, always say exactly: "Question 4 done — session complete!" This signals the end of the session.
+- After the recap at the end of Question 4, always say exactly: **"Question 4 done — session complete!"** This signals the end of the session.
 """.strip()
 
 # ── Problem-specific content guidance ────────────────────────────────────────
@@ -34,13 +34,16 @@ The problem:
     Goal: select a subset of mutually compatible jobs with maximum total value.
 
 Concrete example to use throughout (jobs sorted by finish time):
-    Job 1: [1, 3),  value = 2
-    Job 2: [2, 5),  value = 4
-    Job 3: [3, 7),  value = 4
-    Job 4: [6, 9),  value = 7
-    Job 5: [5, 10), value = 3
 
-    Optimal solution: Jobs 2 + 4, total value = 11.
+| Job | Start | Finish | Value |
+|-----|-------|--------|-------|
+|  1  |   1   |    3   |   2   |
+|  2  |   2   |    5   |   4   |
+|  3  |   3   |    7   |   4   |
+|  4  |   6   |    9   |   7   |
+|  5  |   5   |   10   |   3   |
+
+Optimal solution: Jobs 2 + 4, total value = 11.
 
 Core concepts — work through these in order:
 1. Why greedy fails.
@@ -53,11 +56,14 @@ Core concepts — work through these in order:
 2. Define the subproblem.
    Sort jobs by finish time (already done above).
    Define p(j) = index of the latest job that finishes before job j starts (0 if none).
-     p(1) = 0  (nothing finishes before time 1)
-     p(2) = 0  (nothing finishes before time 2)
-     p(3) = 1  (Job 1 finishes at 3, which is ≤ start of Job 3 = 3)
-     p(4) = 2  (Job 2 finishes at 5, which is ≤ start of Job 4 = 6)
-     p(5) = 2  (Job 2 finishes at 5, which is ≤ start of Job 5 = 5)
+
+   | j | p(j) | Reason                                          |
+   |---|------|-------------------------------------------------|
+   | 1 |  0   | Nothing finishes before start of Job 1 (t=1)   |
+   | 2 |  0   | Nothing finishes before start of Job 2 (t=2)   |
+   | 3 |  1   | Job 1 finishes at t=3 ≤ start of Job 3 (t=3)   |
+   | 4 |  2   | Job 2 finishes at t=5 ≤ start of Job 4 (t=6)   |
+   | 5 |  2   | Job 2 finishes at t=5 ≤ start of Job 5 (t=5)   |
    Ask the student to confirm these p values before continuing.
    Define OPT(j) = maximum value using only jobs from {1, …, j}.
    Ask: "What is OPT(0)?" (Answer: 0 — base case.)
@@ -71,12 +77,15 @@ Core concepts — work through these in order:
 
 4. Trace the DP table and read off the solution.
    Fill in OPT(0) through OPT(5) using the recurrence:
-     OPT(0) = 0
-     OPT(1) = max(OPT(0), 2 + OPT(0))  = max(0, 2) = 2       → take Job 1
-     OPT(2) = max(OPT(1), 4 + OPT(0))  = max(2, 4) = 4       → take Job 2
-     OPT(3) = max(OPT(2), 4 + OPT(1))  = max(4, 6) = 6       → take Job 3 (uses OPT(p(3))=OPT(1)=2)
-     OPT(4) = max(OPT(3), 7 + OPT(2))  = max(6, 11) = 11     → take Job 4 (uses OPT(p(4))=OPT(2)=4)
-     OPT(5) = max(OPT(4), 3 + OPT(2))  = max(11, 7) = 11     → skip Job 5
+
+   | j | Calculation                          | OPT(j) | Decision      |
+   |---|--------------------------------------|--------|---------------|
+   | 0 | base case                            |   0    | —             |
+   | 1 | max(OPT(0), 2 + OPT(0)) = max(0, 2) |   2    | take Job 1    |
+   | 2 | max(OPT(1), 4 + OPT(0)) = max(2, 4) |   4    | take Job 2    |
+   | 3 | max(OPT(2), 4 + OPT(1)) = max(4, 6) |   6    | take Job 3    |
+   | 4 | max(OPT(3), 7 + OPT(2)) = max(6,11) |  11    | take Job 4    |
+   | 5 | max(OPT(4), 3 + OPT(2)) = max(11,7) |  11    | skip Job 5    |
    Ask the student to fill in each row themselves before you confirm it.
    Final answer: OPT(5) = 11. To recover which jobs: backtrack — Job 4 taken, then Job 2 taken → {2, 4}.
 

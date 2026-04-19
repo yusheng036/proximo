@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 
 import anthropic
+import httpx
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
@@ -23,7 +24,10 @@ def _get_client() -> anthropic.Anthropic:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             raise RuntimeError("ANTHROPIC_API_KEY environment variable is not set")
-        _client = anthropic.Anthropic(api_key=api_key)
+        _client = anthropic.Anthropic(
+            api_key=api_key,
+            http_client=httpx.Client(transport=httpx.HTTPTransport(local_address="0.0.0.0")),
+        )
     return _client
 
 
